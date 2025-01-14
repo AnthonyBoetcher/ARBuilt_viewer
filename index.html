@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="2.png">
+    <title>ARBuilt</title>
+    <!-- Link to Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .room {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 200px;
+            background-color: #b8faff;
+        }
+
+        .box {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) rotateY(0deg);
+            transition: transform 0.1s;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            margin-top: -200px;
+            margin-left: -200px;
+            
+        }
+
+        .box-side {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background-color: white; 
+            border: 1px solid #ccc;
+            border-bottom: 1px solid #5a5a5a;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .front  { transform: translateZ(200px); }
+        .back   { transform: rotateY(180deg) translateZ(200px); }
+        .left   { transform: rotateY(-90deg) translateZ(200px); }
+        .right  { transform: rotateY(90deg) translateZ(200px); }
+        .top    { transform: rotateX(90deg) translateZ(200px); }
+        .bottom { transform: rotateX(-90deg) translateZ(200px); }
+
+        .icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.2s;
+        }
+
+        .icon:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Image display container */
+        .image-display {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 50%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: none; /* Hidden initially */
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        .image-display img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        /* Close button */
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            color: #000;
+            font-size: 30px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="room">
+        <div class="box">
+            <div class="box-side front">
+                <div class="icon" onclick="showImage('P1.jpeg')">🔲</div>
+            </div>
+            <div class="box-side back">
+                <div class="icon" onclick="showImage('image2.jpg')">🔳</div>
+            </div>
+            <div class="box-side left">
+                <div class="icon" onclick="showImage('image3.jpg')">⬅️</div>
+            </div>
+            <div class="box-side right">
+                <div class="icon" onclick="showImage('image4.jpg')">➡️</div>
+            </div>
+            <div class="box-side top">
+                <div class="icon" onclick="showImage('image5.jpg')">⬆️</div>
+            </div>
+            <div class="box-side bottom">
+                <div class="icon" onclick="showImage('image6.jpg')">⬇️</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Display -->
+    <div class="image-display" id="imageDisplay">
+        <!-- Bootstrap Close Button -->
+        <button class="close-btn" onclick="closeImage()">&times;</button>
+        <img id="displayedImage" src="" alt="Image" class="img-fluid" />
+    </div>
+
+    <!-- Link to Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        let isMouseDown = false;
+        let lastX = 0;
+        let lastY = 0;
+        let rotX = 0;
+        let rotY = 0;
+
+        const box = document.querySelector('.box');
+        const imageDisplay = document.getElementById('imageDisplay');
+        const displayedImage = document.getElementById('displayedImage');
+
+        // When mouse is pressed down
+        document.addEventListener('mousedown', (e) => {
+            isMouseDown = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        // When mouse is released
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        // When mouse is moved
+        document.addEventListener('mousemove', (e) => {
+            if (isMouseDown) {
+                const deltaX = e.clientX - lastX;
+                const deltaY = e.clientY - lastY;
+
+                // Update the rotation angles
+                rotX += deltaY * 0.5; // control the speed of vertical rotation
+                rotY += deltaX * 0.5; // control the speed of horizontal rotation
+
+                // Update the box transformation
+                box.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+                // Update last mouse position
+                lastX = e.clientX;
+                lastY = e.clientY;
+            }
+        });
+
+        // Prevent the default drag behavior of the browser
+        document.body.addEventListener('dragstart', (e) => e.preventDefault());
+
+        // Function to show image when an icon is clicked
+        function showImage(imagePath) {
+            displayedImage.src = imagePath; // Set the image source
+            imageDisplay.style.display = 'flex'; // Show the image display
+        }
+
+        // Function to close the image display
+        function closeImage() {
+            imageDisplay.style.display = 'none'; // Hide the image display
+        }
+    </script>
+</body>
+</html>
